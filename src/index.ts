@@ -1,17 +1,18 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
+import 'dotenv/config';
 
-const app = express()
+import cors from 'cors';
+import express from 'express';
 
-const PORT = process.env.PORT ?? 4000
+const app = express();
 
-app.use(cors())
+const PORT = process.env.PORT ?? 4000;
+
+app.use(cors());
 
 app.get('/', (_, res) => {
-  res.send('Sky Lending Server')
-})
+  res.send('Sky Lending Server');
+});
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server started on port ${PORT}!`)
-})
+  console.log(`🚀 Server started on port ${PORT}!`);
+});
