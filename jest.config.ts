@@ -1,12 +1,15 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
-import { name } from './package.json';
+import { name } from "./package.json";
 
 const config: Config = {
   clearMocks: true,
   displayName: name,
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  moduleNameMapper: {
+    "@/(.*)": "<rootDir>/src/$1",
+  },
+  preset: "ts-jest",
+  testEnvironment: "node",
 };
 
 export default config;
