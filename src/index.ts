@@ -1,9 +1,32 @@
 import "dotenv/config";
 
+import mongoose from "mongoose";
+
 import app from "@/app";
 
-const PORT = process.env.PORT ?? 4000;
+import envVariables, { validateEnvVars } from "./constants/envVariables";
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server started on port ${PORT}!`);
-});
+const { PORT, DATABASE_NAME, DATABASE_PASS, DATABASE_URL, DATABASE_USER } =
+  envVariables;
+
+const startServer = async (): Promise<void> => {
+  validateEnvVars();
+
+  try {
+    await mongoose.connect(DATABASE_URL, {
+      user: DATABASE_USER,
+      pass: DATABASE_PASS,
+      dbName: DATABASE_NAME,
+    });
+    console.log("🟢 - DB Connected");
+  } catch (error) {
+    console.log("🔴 - DB Error : %o", error);
+    process.exit(1);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server started on port ${PORT}!`);
+  });
+};
+
+void startServer();
