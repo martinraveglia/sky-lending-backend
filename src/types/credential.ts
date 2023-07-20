@@ -1,9 +1,9 @@
-import { type InferSchemaType, type ObjectId } from "mongoose";
+import { type InferSchemaType, type Types } from "mongoose";
 
 import type CredentialModel from "@/models/Credential";
 
 export type Credential = InferSchemaType<typeof CredentialModel.schema> & {
-  _id: ObjectId;
+  _id: Types.ObjectId;
 };
 
 export type CredentialYup = Pick<Credential, "password" | "username">;

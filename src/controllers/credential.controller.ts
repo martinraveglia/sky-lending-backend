@@ -1,5 +1,5 @@
-import { conflict } from "@hapi/boom";
-import { hash } from "bcryptjs";
+import { conflict, unauthorized } from "@hapi/boom";
+import { compare, hash } from "bcryptjs";
 import { type NextFunction, type Request, type Response } from "express";
 import { type ParamsDictionary } from "express-serve-static-core";
 import { sign } from "jsonwebtoken";
@@ -43,7 +43,38 @@ export const userRegistration = async (
       expiresIn: "1h",
     });
 
-    return res.status(201).json(accessToken);
+    return res.status(201).json({ token: accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const userLogIn = async (
+  req: Request<ParamsDictionary, any, CredentialYup>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { password, username } = req.body;
+    const credential = await Credential.findOne({ username });
+    if (!credential) throw unauthorized("invalid credentials");
+
+    const verifiedPassword = await compare(password, credential.password);
+    if (!verifiedPassword) throw unauthorized("invalid credentials");
+
+    const tokenPayload: TokenPayload = {
+      id: credential.id,
+      username: credential.username,
+      role: credential.role,
+    };
+
+    const accessToken = sign(tokenPayload, envVariables.JWT_TOKEN_SECRET, {
+      expiresIn: "1h",
+    });
+
+    return res
+      .status(201)
+      .json({ token: accessToken, userCreated: credential.user ?? false });
   } catch (error) {
     next(error);
   }

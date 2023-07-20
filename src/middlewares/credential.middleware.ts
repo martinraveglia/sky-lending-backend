@@ -1,7 +1,8 @@
-import Boom from "@hapi/boom";
+import { badRequest, unauthorized } from "@hapi/boom";
 import { type NextFunction, type Request, type Response } from "express";
 import { object, type ObjectSchema, string, ValidationError } from "yup";
 
+import paths from "@/constants/paths";
 import { PASSWORD_VALIDATION } from "@/constants/regexs";
 import { type CredentialYup } from "@/types/credential";
 
@@ -15,13 +16,12 @@ const CredentialYupSchema: ObjectSchema<CredentialYup> = object({
     .matches(PASSWORD_VALIDATION, "password is invalid"),
 });
 
-export const validateSignUpPayload = async (
+export const validateCredentialPayload = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    console.log("req", req.body);
     const { username, password } = req.body;
 
     await CredentialYupSchema.validate(
@@ -34,8 +34,12 @@ export const validateSignUpPayload = async (
 
     next();
   } catch (error) {
+    if (req.path.includes(paths.credential.logIn)) {
+      next(unauthorized("invalid credentials"));
+      return;
+    }
     if (error instanceof ValidationError) {
-      next(Boom.badRequest(error.message));
+      next(badRequest(error.message));
       return;
     }
     next(error);

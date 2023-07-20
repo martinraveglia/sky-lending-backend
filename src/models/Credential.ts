@@ -1,4 +1,4 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 import { Role } from "@/types/credential";
 
@@ -13,7 +13,7 @@ const credentialSchema = new Schema(
       required: true,
     },
     user: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
     },
     role: {
