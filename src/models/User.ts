@@ -22,12 +22,6 @@ const userSchema = new Schema(
       match: PHONE_REGEX,
       unique: true,
     },
-    firebaseUID: {
-      type: String,
-      required: true,
-      unique: true,
-      maxlength: 200,
-    },
     SSN: {
       type: Number,
       required: true,

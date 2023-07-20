@@ -4,6 +4,7 @@ const envVars = {
   DATABASE_NAME: process.env.DATABASE_NAME ?? "",
   DATABASE_USER: process.env.DATABASE_USER ?? "",
   DATABASE_PASS: process.env.DATABASE_PASS ?? "",
+  JWT_TOKEN_SECRET: process.env.JWT_TOKEN_SECRET ?? "",
 };
 
 const expectedEnvVariables: Array<keyof typeof envVars> = [
@@ -11,6 +12,7 @@ const expectedEnvVariables: Array<keyof typeof envVars> = [
   "DATABASE_PASS",
   "DATABASE_URL",
   "DATABASE_USER",
+  "JWT_TOKEN_SECRET",
 ];
 
 export const validateEnvVars = (): void => {

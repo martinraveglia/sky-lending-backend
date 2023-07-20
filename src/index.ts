@@ -9,7 +9,7 @@ import envVariables, { validateEnvVars } from "./constants/envVariables";
 const { PORT, DATABASE_NAME, DATABASE_PASS, DATABASE_URL, DATABASE_USER } =
   envVariables;
 
-const startServer = async (): Promise<void> => {
+const startServer = async () => {
   validateEnvVars();
 
   try {
