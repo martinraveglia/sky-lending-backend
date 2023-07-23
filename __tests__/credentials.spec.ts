@@ -82,6 +82,7 @@ describe("Test the credentials controllers", () => {
       },
     );
   });
+
   describe(`Test the ${p("signUp")} endpoint`, () => {
     it.each`
       username         | password

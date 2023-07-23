@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { type Credential, Role } from "@/types/credential";
+import { type User } from "@/types/user";
 
 const now = new Date();
 
@@ -30,6 +31,19 @@ export const MOCKED_CREDENTIALS: Credential[] = [
     username: "Fake Username 3",
     password: "FakePassword3",
     role: Role.admin,
+    createdAt: minutesSum(-10),
+    updatedAt: now,
+  },
+];
+
+export const MOCKED_USERS: User[] = [
+  {
+    _id: new Types.ObjectId("000f191e810c19729de86001"),
+    firstName: "Fake First Name",
+    lastName: "Fake Last Name",
+    SSN: 123456789,
+    phone: "+1234567890123",
+    DoB: new Date(1995, 2, 3),
     createdAt: minutesSum(-10),
     updatedAt: now,
   },

@@ -24,13 +24,10 @@ export const validateCredentialPayload = async (
   try {
     const { username, password } = req.body;
 
-    await CredentialYupSchema.validate(
-      {
-        username,
-        password,
-      },
-      { strict: true },
-    );
+    await CredentialYupSchema.validate({
+      username,
+      password,
+    });
 
     next();
   } catch (error) {

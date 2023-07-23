@@ -3,6 +3,7 @@ import { type NextFunction, type Request, type Response } from "express";
 import { verify } from "jsonwebtoken";
 
 import envVariables from "@/constants/envVariables";
+import paths from "@/constants/paths";
 import User from "@/models/User";
 import { Role, type TokenPayload } from "@/types/credential";
 
@@ -15,11 +16,14 @@ export const isUserMiddleware = async (
 ) => {
   try {
     const { authorization } = req.headers;
+    const userShouldExist =
+      req.method !== "POST" ||
+      !req.path.includes(paths.user.createPersonalInformation);
 
-    if (!authorization) throw forbidden("Provide a token");
+    if (!authorization) throw forbidden("provide a token");
 
     if (!authorization.startsWith(BEARER_STRING)) {
-      throw unauthorized("Invalid token format");
+      throw unauthorized("invalid token format");
     }
 
     const token = authorization.replace(BEARER_STRING, "");
@@ -29,14 +33,15 @@ export const isUserMiddleware = async (
       envVariables.JWT_TOKEN_SECRET,
     ) as TokenPayload;
 
-    if (role !== Role.user) throw unauthorized("Provide a valid user token");
+    if (role !== Role.user) throw unauthorized("provide a valid user token");
 
     const user = await User.findOne({
       _id: id,
     });
-    if (!user) throw internal("User does not exists.");
+    if (!user && userShouldExist) throw internal("user does not exist");
 
     res.locals.user = user;
+    res.locals.credential = id;
 
     next();
   } catch (error) {
