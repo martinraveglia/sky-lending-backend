@@ -4,6 +4,7 @@ import { verify } from "jsonwebtoken";
 
 import envVariables from "@/constants/envVariables";
 import paths from "@/constants/paths";
+import Credential from "@/models/Credential";
 import User from "@/models/User";
 import { Role, type TokenPayload } from "@/types/credential";
 
@@ -35,8 +36,11 @@ export const isUserMiddleware = async (
 
     if (role !== Role.user) throw unauthorized("provide a valid user token");
 
+    const credential = await Credential.findOne({ _id: id });
+    if (!credential) throw internal("credential does not exist");
+
     const user = await User.findOne({
-      _id: id,
+      _id: credential.user,
     });
     if (!user && userShouldExist) throw internal("user does not exist");
 

@@ -75,7 +75,7 @@ export const validatePersonalInformationPayload = async (
         SSN,
         DoB,
       },
-      { context: { onUpdate: req.method === "PUT" } },
+      { context: { onUpdate: req.method === "PATCH" } },
     );
 
     next();

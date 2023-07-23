@@ -13,13 +13,14 @@ export const createPersonalInformation = async (
 ) => {
   try {
     const { firstName, lastName, DoB, SSN, phone } = req.body;
+    const { credential } = res.locals;
 
     const foundCredential = await Credential.findOne({
-      _id: res.locals.credential,
+      _id: credential,
     });
 
     if (!foundCredential) {
-      throw internal("credential not found");
+      throw internal("credential does not exist");
     }
 
     const newUser = new User({
@@ -33,6 +34,43 @@ export const createPersonalInformation = async (
 
     foundCredential.user = newUser._id;
     await foundCredential.save();
+
+    return res.status(201).json({ message: "SUCCESS" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePersonalInformation = async (
+  req: Request<ParamsDictionary, any, Partial<UserYup>>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { firstName, lastName, DoB, SSN, phone } = req.body;
+    const {
+      user: { _id },
+      credential,
+    } = res.locals;
+
+    const foundCredential = await Credential.findOne({
+      _id: credential,
+    });
+
+    if (!foundCredential) {
+      throw internal("credential does not exist");
+    }
+
+    await User.findOneAndUpdate(
+      { _id },
+      {
+        firstName,
+        lastName,
+        DoB,
+        SSN,
+        phone,
+      },
+    );
 
     return res.status(201).json({ message: "SUCCESS" });
   } catch (error) {
