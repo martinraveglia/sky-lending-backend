@@ -4,6 +4,7 @@ import { type ParamsDictionary } from "express-serve-static-core";
 
 import Credential from "@/models/Credential";
 import User from "@/models/User";
+import { Role } from "@/types/credential";
 import { type UserYup } from "@/types/user";
 
 export const createPersonalInformation = async (
@@ -85,6 +86,32 @@ export const getPersonalInformation = async (
     const { firstName, lastName, SSN, DoB, phone }: UserYup = foundUser;
 
     return res.status(201).json({ firstName, lastName, SSN, DoB, phone });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllPersonalInformation = async (
+  req: Request<ParamsDictionary, any, Partial<UserYup>>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const users = await Credential.find().populate<{
+      user: UserYup | undefined;
+    }>("user");
+    const responsePayload = users
+      .filter((credential) => credential.role === Role.user)
+      .map((credential) => ({
+        username: credential.username,
+        firstName: credential.user?.firstName,
+        lastName: credential.user?.lastName,
+        SSN: credential.user?.SSN,
+        phone: credential.user?.phone,
+        DoB: credential.user?.DoB,
+      }));
+
+    return res.status(201).json(responsePayload);
   } catch (error) {
     next(error);
   }

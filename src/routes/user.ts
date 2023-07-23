@@ -3,10 +3,14 @@ import express from "express";
 import paths from "@/constants/paths";
 import {
   createPersonalInformation,
+  getAllPersonalInformation,
   getPersonalInformation,
   updatePersonalInformation,
 } from "@/controllers/user.controller";
-import { isUserMiddleware } from "@/middlewares/auth.middleware";
+import {
+  isAdminMiddleware,
+  isUserMiddleware,
+} from "@/middlewares/auth.middleware";
 import { validatePersonalInformationPayload } from "@/middlewares/user.middleware";
 
 const router = express.Router();
@@ -29,6 +33,12 @@ router.get(
   paths.user.getPersonalInformation,
   isUserMiddleware,
   getPersonalInformation,
+);
+
+router.get(
+  paths.user.getAllPersonalInformation,
+  isAdminMiddleware,
+  getAllPersonalInformation,
 );
 
 export default router;

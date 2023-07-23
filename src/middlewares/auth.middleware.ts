@@ -52,3 +52,37 @@ export const isUserMiddleware = async (
     next(error);
   }
 };
+
+export const isAdminMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { authorization } = req.headers;
+
+    if (!authorization) throw forbidden("provide a token");
+
+    if (!authorization.startsWith(BEARER_STRING)) {
+      throw unauthorized("invalid token format");
+    }
+
+    const token = authorization.replace(BEARER_STRING, "");
+
+    const { role, id } = verify(
+      token,
+      envVariables.JWT_TOKEN_SECRET,
+    ) as TokenPayload;
+
+    if (role !== Role.admin) throw unauthorized("provide a valid admin token");
+
+    const credential = await Credential.findOne({ _id: id });
+    if (!credential) throw internal("credential does not exist");
+
+    res.locals.credential = id;
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
