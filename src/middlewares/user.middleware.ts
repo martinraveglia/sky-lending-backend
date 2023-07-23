@@ -41,7 +41,7 @@ const UserPersonalInformationYupSchema: ObjectSchema<Partial<UserYup>> = object(
       .integer()
       .test(
         "len",
-        "must be exactly 9 digits",
+        "SSN must be exactly 9 digits",
         (ssn) => ssn == null || ssn.toString().length === 9,
       )
       .when("$onUpdate", {

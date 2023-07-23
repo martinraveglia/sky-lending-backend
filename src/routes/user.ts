@@ -3,6 +3,7 @@ import express from "express";
 import paths from "@/constants/paths";
 import {
   createPersonalInformation,
+  getPersonalInformation,
   updatePersonalInformation,
 } from "@/controllers/user.controller";
 import { isUserMiddleware } from "@/middlewares/auth.middleware";
@@ -22,6 +23,12 @@ router.patch(
   isUserMiddleware,
   validatePersonalInformationPayload,
   updatePersonalInformation,
+);
+
+router.get(
+  paths.user.getPersonalInformation,
+  isUserMiddleware,
+  getPersonalInformation,
 );
 
 export default router;

@@ -50,16 +50,7 @@ export const updatePersonalInformation = async (
     const { firstName, lastName, DoB, SSN, phone } = req.body;
     const {
       user: { _id },
-      credential,
     } = res.locals;
-
-    const foundCredential = await Credential.findOne({
-      _id: credential,
-    });
-
-    if (!foundCredential) {
-      throw internal("credential does not exist");
-    }
 
     await User.findOneAndUpdate(
       { _id },
@@ -73,6 +64,27 @@ export const updatePersonalInformation = async (
     );
 
     return res.status(201).json({ message: "SUCCESS" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPersonalInformation = async (
+  req: Request<ParamsDictionary, any, Partial<UserYup>>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const {
+      user: { _id },
+    } = res.locals;
+
+    const foundUser = await User.findOne({ _id });
+    if (!foundUser) throw internal("user does not exist");
+
+    const { firstName, lastName, SSN, DoB, phone }: UserYup = foundUser;
+
+    return res.status(201).json({ firstName, lastName, SSN, DoB, phone });
   } catch (error) {
     next(error);
   }

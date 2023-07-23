@@ -222,4 +222,93 @@ describe("Test the users controllers", () => {
       });
     });
   });
+
+  describe(`Test the ${p("getPersonalInformation")} endpoint`, () => {
+    it("It should respond the GET method with a 403, when the header does not contain a token", async () => {
+      const response = await request(app).get(p("getPersonalInformation"));
+      expect(response.statusCode).toBe(403);
+      expect(response.body).toEqual({ message: "provide a token" });
+    });
+
+    it("It should respond the GET method with a 401, when the token is invalid", async () => {
+      const token = "INVALID_TOKEN";
+
+      const response = await request(app)
+        .get(p("getPersonalInformation"))
+        .set("Authorization", token);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.body).toEqual({ message: "invalid token format" });
+    });
+
+    it("It should respond the GET method with a 401, when the role is invalid", async () => {
+      verify.mockImplementationOnce(() => ({
+        role: Role.admin,
+        id: "FAKE_ID",
+      }));
+      const token = "VALID_TOKEN";
+
+      const response = await request(app)
+        .get(p("getPersonalInformation"))
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.body).toEqual({ message: "provide a valid user token" });
+    });
+
+    it("It should respond the GET method with a 500, when no associated credential is found", async () => {
+      verify.mockImplementationOnce(() => ({
+        role: Role.user,
+        id: "FAKE_ID",
+      }));
+      const token = "VALID_TOKEN";
+
+      mockingoose(Credential).toReturn(null, "findOne");
+
+      const response = await request(app)
+        .get(p("getPersonalInformation"))
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(500);
+      expect(response.body).toEqual({ message: "credential does not exist" });
+    });
+
+    it("It should respond the GET method with a 500, when no associated user is found", async () => {
+      verify.mockImplementationOnce(() => ({
+        role: Role.user,
+        id: "FAKE_ID",
+      }));
+      const token = "VALID_TOKEN";
+
+      mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
+      mockingoose(User).toReturn(null, "findOne");
+
+      const response = await request(app)
+        .get(p("getPersonalInformation"))
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.statusCode).toBe(500);
+      expect(response.body).toEqual({ message: "user does not exist" });
+    });
+
+    it("It should respond the GET method with a 201 when valid credentials are sent", async () => {
+      const token = "VALID_TOKEN";
+      mockingoose(User).toReturn(MOCKED_USERS[0], "findOne");
+      mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
+      const { firstName, lastName, SSN, DoB, phone } = MOCKED_USERS[0];
+      const expectedBody = {
+        firstName,
+        lastName,
+        SSN,
+        DoB: DoB.toJSON(),
+        phone,
+      };
+
+      const response = await request(app)
+        .get(p("getPersonalInformation"))
+        .set("Authorization", `Bearer ${token}`);
+      expect(response.statusCode).toBe(201);
+      expect(response.body).toEqual(expectedBody);
+    });
+  });
 });
