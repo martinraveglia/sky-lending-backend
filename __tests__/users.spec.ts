@@ -1,3 +1,4 @@
+import axios from "axios";
 import jwt from "jsonwebtoken";
 import request from "supertest";
 
@@ -11,6 +12,7 @@ import { Role } from "@/types/credential";
 const mockingoose = require("mockingoose");
 
 const verify = jest.spyOn(jwt, "verify");
+const axiosGet = jest.spyOn(axios, "get");
 
 const p = (path: keyof typeof paths.user) =>
   paths.base + paths.user.base + paths.user[path];
@@ -80,6 +82,9 @@ describe("Test the users controllers", () => {
     `(
       "It should respond to the POST method with a 400, when req has valid token but data is incorrect",
       async ({ firstName, lastName, SSN, phone, DoB }) => {
+        axiosGet.mockImplementation(
+          async () => await Promise.resolve({ data: { valid: true } }),
+        );
         mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
         verify.mockImplementation(() => ({
           role: Role.user,
@@ -95,8 +100,45 @@ describe("Test the users controllers", () => {
       },
     );
 
+    it.each`
+      payloadKey   | payloadValue | errorMessage
+      ${"valid"}   | ${false}     | ${"phone number is invalid"}
+      ${"success"} | ${false}     | ${"NUMVERIFY_ERROR_MESSAGE"}
+    `(
+      "It should respond to the POST method with a 400, when req has valid token but phone is not validated by Numverify",
+      async ({ payloadKey, payloadValue, errorMessage }) => {
+        axiosGet.mockImplementation(
+          async () =>
+            await Promise.resolve({
+              data: {
+                [payloadKey]: payloadValue,
+                error: { info: "NUMVERIFY_ERROR_MESSAGE" },
+              },
+            }),
+        );
+        mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
+        verify.mockImplementation(() => ({
+          role: Role.user,
+          id: "FAKE_ID",
+        }));
+        const token = "VALID_TOKEN";
+
+        const response = await request(app)
+          .post(p("createPersonalInformation"))
+          .set("Authorization", `Bearer ${token}`)
+          .send(MOCKED_USERS[0]);
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({
+          message: errorMessage,
+        });
+      },
+    );
+
     it("It should respond the POST method with a 201 when valid payload is sent", async () => {
       const token = "VALID_TOKEN";
+      axiosGet.mockImplementation(
+        async () => await Promise.resolve({ data: { valid: true } }),
+      );
       mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
 
       const response = await request(app)
@@ -192,6 +234,9 @@ describe("Test the users controllers", () => {
     `(
       "It should respond to the PATCH method with a 400, when req has valid token but data is incorrect",
       async ({ firstName, lastName, SSN, phone, DoB }) => {
+        axiosGet.mockImplementation(
+          async () => await Promise.resolve({ data: { valid: true } }),
+        );
         verify.mockImplementation(() => ({
           role: Role.user,
           id: "FAKE_ID",
@@ -206,7 +251,44 @@ describe("Test the users controllers", () => {
       },
     );
 
+    it.each`
+      payloadKey   | payloadValue | errorMessage
+      ${"valid"}   | ${false}     | ${"phone number is invalid"}
+      ${"success"} | ${false}     | ${"NUMVERIFY_ERROR_MESSAGE"}
+    `(
+      "It should respond to the POST method with a 400, when req has valid token but phone is not validated by Numverify",
+      async ({ payloadKey, payloadValue, errorMessage }) => {
+        axiosGet.mockImplementation(
+          async () =>
+            await Promise.resolve({
+              data: {
+                [payloadKey]: payloadValue,
+                error: { info: "NUMVERIFY_ERROR_MESSAGE" },
+              },
+            }),
+        );
+        mockingoose(Credential).toReturn(MOCKED_CREDENTIALS[0], "findOne");
+        verify.mockImplementation(() => ({
+          role: Role.user,
+          id: "FAKE_ID",
+        }));
+        const token = "VALID_TOKEN";
+
+        const response = await request(app)
+          .post(p("updatePersonalInformation"))
+          .set("Authorization", `Bearer ${token}`)
+          .send(MOCKED_USERS[0]);
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({
+          message: errorMessage,
+        });
+      },
+    );
+
     it("It should respond the PATCH method with a 201 when valid payload is sent", async () => {
+      axiosGet.mockImplementationOnce(
+        async () => await Promise.resolve({ data: { valid: true } }),
+      );
       const { firstName, DoB, SSN } = MOCKED_USERS[0];
       const token = "VALID_TOKEN";
       mockingoose(User).toReturn(MOCKED_USERS[0], "findOne");

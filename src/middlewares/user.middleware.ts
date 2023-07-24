@@ -1,4 +1,5 @@
 import { badRequest } from "@hapi/boom";
+import axios, { AxiosError } from "axios";
 import { type NextFunction, type Request, type Response } from "express";
 import {
   date,
@@ -9,7 +10,11 @@ import {
   ValidationError,
 } from "yup";
 
-import { type UserYup } from "@/types/user";
+import envVariables from "@/constants/envVariables";
+import {
+  type phoneExternalValidationResponse,
+  type UserYup,
+} from "@/types/user";
 
 const UserPersonalInformationYupSchema: ObjectSchema<Partial<UserYup>> = object(
   {
@@ -78,9 +83,30 @@ export const validatePersonalInformationPayload = async (
       { context: { onUpdate: req.method === "PATCH" } },
     );
 
+    if (phone == null && req.method === "PATCH") {
+      next();
+      return;
+    }
+
+    const phoneToValidate: string =
+      phone != null ? phone.toString().replace("+", "") : "";
+    const phoneExternalValidation =
+      await axios.get<phoneExternalValidationResponse>(
+        `http://apilayer.net/api/validate?access_key=${envVariables.NUMVERIFY_API_KEY}&number=${phoneToValidate}&country_code=&format=1`,
+      );
+    if (phoneExternalValidation.data.success === false)
+      throw badRequest(phoneExternalValidation.data.error.info);
+
+    if (phoneExternalValidation.data.valid === false)
+      throw badRequest("phone number is invalid");
+
     next();
   } catch (error) {
     if (error instanceof ValidationError) {
+      next(badRequest(error.message));
+      return;
+    }
+    if (error instanceof AxiosError) {
       next(badRequest(error.message));
       return;
     }

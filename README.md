@@ -259,7 +259,7 @@ Show all User accounts in the database.
     "firstName": "John",
     "lastName": "Doe",
     "SSN": 123456789,
-    "phone": "+123456789012",
+    "phone": "+543413491237",
     "DoB": "1995-03-02T03:00:00.000Z"
   }
 ]
@@ -287,7 +287,7 @@ Show information of the currently Authenticated User.
   "firstName": "John",
   "lastName": "Doe",
   "SSN": 123456789,
-  "phone": "+123456789012",
+  "phone": "+543413491237",
   "DoB": "1995-03-02T03:00:00.000Z"
 }
 ```
@@ -313,7 +313,7 @@ Add personal information of the Currently Authenticated User.
   "firstName": "John",
   "lastName": "Doe",
   "DoB": "03/02/1995",
-  "phone": "+123456789012",
+  "phone": "+543413491237",
   "SSN": "123456789"
 }
 ```
@@ -331,6 +331,7 @@ Add personal information of the Currently Authenticated User.
 | | Unique |
 | | Starts with + |
 | | Total length between 12 and 14 |
+| | Phone verified with Numverify API |
 | SSN | Required |
 | | Unique |
 | | 9 digits |
@@ -379,6 +380,7 @@ Update personal information of the Currently Authenticated User.
 | phone | Unique |
 | | Starts with + |
 | | Total length between 12 and 14 |
+| | Phone verified with Numverify API |
 | SSN | Unique |
 | | 9 digits |
 | DoB | Format "mm/dd/yyyy" |
