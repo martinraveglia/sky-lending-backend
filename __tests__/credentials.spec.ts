@@ -6,6 +6,7 @@ import app from "@/app";
 import { MOCKED_CREDENTIALS } from "@/constants/mockedData";
 import paths from "@/constants/paths";
 import Credential from "@/models/Credential";
+import { type Role } from "@/types/credential";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require("mockingoose");
 
@@ -75,9 +76,11 @@ describe("Test the credentials controllers", () => {
         expect(response.body).toEqual<{
           token: string;
           userCreated: Types.ObjectId | false;
+          role: Role;
         }>({
           token: expect.any(String),
           userCreated: userCredentials.user?.toString() ?? false,
+          role: userCredentials.role,
         });
       },
     );

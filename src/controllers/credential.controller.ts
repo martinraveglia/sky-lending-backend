@@ -40,7 +40,7 @@ export const userRegistration = async (
     };
 
     const accessToken = sign(tokenPayload, envVariables.JWT_TOKEN_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
     return res.status(201).json({ token: accessToken });
@@ -69,12 +69,14 @@ export const userLogIn = async (
     };
 
     const accessToken = sign(tokenPayload, envVariables.JWT_TOKEN_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
-    return res
-      .status(201)
-      .json({ token: accessToken, userCreated: credential.user ?? false });
+    return res.status(201).json({
+      token: accessToken,
+      userCreated: credential.user ?? false,
+      role: credential.role,
+    });
   } catch (error) {
     next(error);
   }

@@ -78,6 +78,7 @@ export const getPersonalInformation = async (
   try {
     const {
       user: { _id },
+      username,
     } = res.locals;
 
     const foundUser = await User.findOne({ _id });
@@ -85,7 +86,9 @@ export const getPersonalInformation = async (
 
     const { firstName, lastName, SSN, DoB, phone }: UserYup = foundUser;
 
-    return res.status(201).json({ firstName, lastName, SSN, DoB, phone });
+    return res
+      .status(201)
+      .json({ firstName, lastName, SSN, DoB, phone, username });
   } catch (error) {
     next(error);
   }

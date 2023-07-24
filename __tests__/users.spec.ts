@@ -302,6 +302,7 @@ describe("Test the users controllers", () => {
         SSN,
         DoB: DoB.toJSON(),
         phone,
+        username: MOCKED_CREDENTIALS[0].username,
       };
 
       const response = await request(app)

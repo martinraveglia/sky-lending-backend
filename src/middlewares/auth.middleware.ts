@@ -45,6 +45,7 @@ export const isUserMiddleware = async (
     if (!user && userShouldExist) throw internal("user does not exist");
 
     res.locals.user = user;
+    res.locals.username = credential.username;
     res.locals.credential = id;
 
     next();
